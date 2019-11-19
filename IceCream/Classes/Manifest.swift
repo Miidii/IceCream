@@ -12,18 +12,8 @@ import Foundation
 public class IceCream {
     
     public static let shared = IceCream()
-    
-    /// There are quite a lot `print`s in the IceCream source files.
-    /// If you don't want to see them in your console, just set `enableLogging` property to false.
-    /// The default value is true.
-    public var enableLogging: Bool = true
-    
-}
 
-/// If you want to know more,
-/// this post would help: https://medium.com/@maxcampolo/swift-conditional-logging-compiler-flags-54692dc86c5f
-internal func print(_ items: Any..., separator: String = " ", terminator: String = "\n") {
-    if (IceCream.shared.enableLogging) {
+    public var print: ((_ items: Any..., String, String) -> Void) = { items, separator, terminator in
         #if DEBUG
         var i = items.startIndex
         repeat {
@@ -32,4 +22,11 @@ internal func print(_ items: Any..., separator: String = " ", terminator: String
         } while i < items.endIndex
         #endif
     }
+
+}
+
+/// If you want to know more,
+/// this post would help: https://medium.com/@maxcampolo/swift-conditional-logging-compiler-flags-54692dc86c5f
+internal func print(_ items: Any..., separator: String = " ", terminator: String = "\n") {
+    IceCream.shared.print(items, separator: separator, terminator: terminator)
 }
