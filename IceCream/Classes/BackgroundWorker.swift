@@ -16,7 +16,23 @@ public class BackgroundWorker: NSObject {
     static let shared = BackgroundWorker()
     
     private var thread: Thread?
-    private var block: (() -> Void)?
+
+    private var queue: DispatchQueue?
+    private var queueKey: DispatchSpecificKey<String>?
+
+    private var _block: (() -> Void)?
+    private var block: (() -> Void)? {
+        get {
+            return sync {
+                return _block
+            }
+        }
+        set {
+            sync {
+                _block = newValue
+            }
+        }
+    }
     
     func start(_ block: @escaping () -> Void) {
         self.block = block
@@ -34,8 +50,19 @@ public class BackgroundWorker: NSObject {
                 }
                 Thread.exit()
             }
-            thread?.name = "\(String(describing: self))-\(UUID().uuidString)"
+
+            let name = "\(String(describing: self))-\(UUID().uuidString)"
+
+            thread?.name = name
             thread?.start()
+
+            let queue = DispatchQueue(label: name)
+            let key = DispatchSpecificKey<String>()
+
+            queue.setSpecific(key: key, value: queue.label)
+
+            self.queue = queue
+            self.queueKey = key
         }
         
         if let thread = thread {
@@ -53,5 +80,20 @@ public class BackgroundWorker: NSObject {
     
     @objc private func runBlock() {
         block?()
+    }
+
+    // https://gist.github.com/khanlou/2dc012e356fd372ecba845752d9a938a
+    private func sync<T>(_ execute: () -> T) -> T {
+        guard let key = queueKey, let queue = queue else {
+            return execute()
+        }
+
+        if DispatchQueue.getSpecific(key: key) == queue.label {
+            return execute()
+        } else {
+            return queue.sync {
+                return execute()
+            }
+        }
     }
 }
