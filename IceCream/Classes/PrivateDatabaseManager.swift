@@ -43,20 +43,26 @@ final class PrivateDatabaseManager: DatabaseManager {
                 self.databaseChangeToken = newToken
                 // Fetch the changes in zone level
                 self.fetchChangesInZones(callback)
+
             case .retry(let timeToWait, _):
                 ErrorHandler.shared.retryOperationIfPossible(retryAfter: timeToWait, block: {
                     self.fetchChangesInDatabase(callback)
                 })
+
             case .recoverableError(let reason, _):
                 switch reason {
                 case .changeTokenExpired:
                     /// The previousServerChangeToken value is too old and the client must re-sync from scratch
                     self.databaseChangeToken = nil
                     self.fetchChangesInDatabase(callback)
+
                 default:
+                    callback?(error)
                     return
                 }
+
             default:
+                callback?(error)
                 return
             }
         }
@@ -164,10 +170,12 @@ final class PrivateDatabaseManager: DatabaseManager {
             case .success:
                 guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
                 syncObject.zoneChangesToken = token
+
             case .retry(let timeToWait, _):
                 ErrorHandler.shared.retryOperationIfPossible(retryAfter: timeToWait, block: {
                     self.fetchChangesInZones(callback)
                 })
+
             case .recoverableError(let reason, _):
                 switch reason {
                 case .changeTokenExpired:
@@ -188,6 +196,7 @@ final class PrivateDatabaseManager: DatabaseManager {
                 default:
                     return
                 }
+
             default:
                 return
             }
