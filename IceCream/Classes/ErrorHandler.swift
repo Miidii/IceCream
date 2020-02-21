@@ -32,6 +32,8 @@ struct ErrorHandler {
         case partialFailure
         case serverRecordChanged
         case shareRelated
+        case userDeletedZone
+        case zoneNotFound
         case unhandledErrorCode
         case unknown
     }
@@ -96,7 +98,13 @@ struct ErrorHandler {
         case .quotaExceeded:
             print("ErrorHandler.Fail: \(message)")
             return .fail(reason: .quotaExceeded, message: message)
-            
+
+        case .userDeletedZone:
+            return .recoverableError(reason: .userDeletedZone, message: message)
+
+        case .zoneNotFound:
+            return .recoverableError(reason: .zoneNotFound, message: message)
+
         // FAIL IS THE FINAL, WE REALLY CAN'T DO MORE
         default:
             print("ErrorHandler.Fail: \(message)")

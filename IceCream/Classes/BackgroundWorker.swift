@@ -14,7 +14,7 @@ import RealmSwift
 public class BackgroundWorker: NSObject {
     
     static let shared = BackgroundWorker()
-    
+
     private var thread: Thread?
 
     private var queue: DispatchQueue?

@@ -175,6 +175,16 @@ final class PrivateDatabaseManager: DatabaseManager {
                     guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
                     syncObject.zoneChangesToken = nil
                     self.fetchChangesInZones(callback)
+
+                case .zoneNotFound, .userDeletedZone:
+                    guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
+
+                    syncObject.isCustomZoneCreated = false
+                    self.createCustomZonesIfAllowed()
+
+                    syncObject.zoneChangesToken = nil
+                    self.fetchChangesInZones(callback)
+
                 default:
                     return
                 }
