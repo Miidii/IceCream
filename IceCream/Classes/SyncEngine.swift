@@ -74,13 +74,18 @@ extension SyncEngine {
     public func pull(completionHandler: ((Error?) -> Void)? = nil) {
         databaseManager.fetchChangesInDatabase(completionHandler)
     }
-    
+
+    public func pullAll(completionHandler: ((Error?) -> Void)? = nil) {
+        databaseManager.resetChangeToken()
+        databaseManager.fetchChangesInDatabase(completionHandler)
+    }
+
     /// Push all existing local data to CloudKit
     /// You should NOT to call this method too frequently
     public func pushAll() {
         databaseManager.syncObjects.forEach { $0.pushLocalObjectsToCloudKit() }
     }
-    
+
 }
 
 public enum Notifications: String, NotificationName {
