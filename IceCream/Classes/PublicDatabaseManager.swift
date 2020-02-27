@@ -117,4 +117,9 @@ final class PublicDatabaseManager: DatabaseManager {
             syncObject.cleanUp()
         }
     }
+
+    func resetChangeToken() {
+
+    }
+
 }

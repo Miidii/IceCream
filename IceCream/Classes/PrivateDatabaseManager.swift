@@ -258,4 +258,9 @@ extension PrivateDatabaseManager {
             syncObject.cleanUp()
         }
     }
+
+    func resetChangeToken() {
+        databaseChangeToken = nil
+    }
+
 }

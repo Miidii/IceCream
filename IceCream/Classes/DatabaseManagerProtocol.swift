@@ -39,6 +39,8 @@ public protocol DatabaseManager: class {
     func registerLocalDatabase()
     
     func cleanUp()
+
+    func resetChangeToken()
 }
 
 extension DatabaseManager {
