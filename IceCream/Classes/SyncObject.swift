@@ -151,7 +151,7 @@ extension SyncObject: Syncable {
     public func pushLocalObjectsToCloudKit() {
         let realm = try! Realm(configuration: self.realmConfiguration)
         let recordsToStore = realm.objects(T.self).filter { !$0.isDeleted }.map { $0.record }
-        let recordsIDsToDelete: [CKRecord] = realm.objects(T.self).filter { $0.isDeleted }.map { $0.recordID }
+        let recordsIDsToDelete = realm.objects(T.self).filter { $0.isDeleted }.map { $0.recordID }
         pipeToEngine?(recordsToStore, recordsIDsToDelete)
     }
     
