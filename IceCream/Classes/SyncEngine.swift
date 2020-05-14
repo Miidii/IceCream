@@ -95,9 +95,9 @@ extension SyncEngine {
         databaseManager.registerLocalDatabase()
     }
 
-    public func push<T: Object & CKRecordConvertible & CKRecordRecoverable>(store objectsToStore: [T], delete objectsToDelete: [T]) {
-        let recordsToStore: [CKRecord] = objectsToStore.filter { !$0.isDeleted }.map { $0.record }
-        let recordsIDsToDelete: [CKRecord.ID] = objectsToDelete.filter { $0.isDeleted }.map { $0.recordID }
+    public func push<T: Object & CKRecordConvertible & CKRecordRecoverable>(objects: [T]) {
+        let recordsToStore: [CKRecord] = objects.filter { !$0.isDeleted }.map { $0.record }
+        let recordsIDsToDelete: [CKRecord.ID] = objects.filter { $0.isDeleted }.map { $0.recordID }
         databaseManager.syncRecordsToCloudKit(recordsToStore: recordsToStore, recordIDsToDelete: recordsIDsToDelete)
     }
 
