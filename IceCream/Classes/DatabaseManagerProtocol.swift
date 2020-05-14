@@ -37,6 +37,7 @@ protocol DatabaseManager: class {
     func startObservingTermination()
     func createDatabaseSubscriptionIfHaveNot()
     func registerLocalDatabase()
+    func unregisterLocalDatabase()
     
     func cleanUp()
 

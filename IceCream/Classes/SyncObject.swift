@@ -129,6 +129,10 @@ extension SyncObject: Syncable {
             })
         }
     }
+
+    public func unregisterLocalDatabase() {
+        self.notificationToken = nil
+    }
     
     public func cleanUp() {
         BackgroundWorker.shared.start {

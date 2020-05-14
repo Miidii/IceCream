@@ -6,6 +6,7 @@
 //
 
 import CloudKit
+import RealmSwift
 
 /// SyncEngine talks to CloudKit directly.
 /// Logically,
@@ -84,6 +85,20 @@ extension SyncEngine {
     /// You should NOT to call this method too frequently
     public func pushAll() {
         databaseManager.syncObjects.forEach { $0.pushLocalObjectsToCloudKit() }
+    }
+
+    public func pause() {
+        databaseManager.unregisterLocalDatabase()
+    }
+
+    public func resume() {
+        databaseManager.registerLocalDatabase()
+    }
+
+    public func push<T: Object & CKRecordConvertible & CKRecordRecoverable>(store objectsToStore: [T], delete objectsToDelete: [T]) {
+        let recordsToStore: [CKRecord] = objectsToStore.filter { !$0.isDeleted }.map { $0.record }
+        let recordsIDsToDelete: [CKRecord.ID] = objectsToDelete.filter { $0.isDeleted }.map { $0.recordID }
+        databaseManager.syncRecordsToCloudKit(recordsToStore: recordsToStore, recordIDsToDelete: recordsIDsToDelete)
     }
 
 }
