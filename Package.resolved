@@ -18,6 +18,24 @@
           "revision": "d2f6573960c84ebea3e0236047b3d976f95a5d7a",
           "version": "5.23.6"
         }
+      },
+      {
+        "package": "RxRealm",
+        "repositoryURL": "https://github.com/RxSwiftCommunity/RxRealm",
+        "state": {
+          "branch": null,
+          "revision": "70188d79fe2eb19b5013dd1deae33e9e53f10e76",
+          "version": "2.0.0"
+        }
+      },
+      {
+        "package": "RxSwift",
+        "repositoryURL": "https://github.com/ReactiveX/RxSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "cec68169a048a079f461ba203fe85636548d7a89",
+          "version": "5.1.3"
+        }
       }
     ]
   },
