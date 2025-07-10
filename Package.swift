@@ -13,14 +13,14 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            url: "https://github.com/realm/realm-cocoa", 
-            from: "4.1.1"
+            url: "https://github.com/realm/realm-swift.git", 
+            from: "10.0.0"
         )
     ],
     targets: [
         .target(
             name: "IceCream",
-            dependencies: ["RealmSwift", "Realm"],
+            dependencies: ["RealmSwift"],
             path: "IceCream",
             sources: ["Classes"])
     ],
