@@ -19,6 +19,8 @@ final class PrivateDatabaseManager: DatabaseManager {
     let database: CKDatabase
     
     let syncObjects: [Syncable]
+
+    private let recordProcessingQueue = DispatchQueue(label: "IceCream.PrivateDatabaseManager.recordProcessing")
     
     public init(objects: [Syncable], container: CKContainer) {
         self.syncObjects = objects
@@ -170,8 +172,10 @@ final class PrivateDatabaseManager: DatabaseManager {
         changesOp.recordZoneChangeTokensUpdatedBlock = { [weak self] zoneId, token, _ in
             print("🍦 Record zone \(zoneId) change token updated")
             guard let self = self else { return }
-            guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
-            syncObject.zoneChangesToken = token
+            self.recordProcessingQueue.sync {
+                guard let syncObject = self.syncObjects.first(where: { $0.zoneID == zoneId }) else { return }
+                syncObject.zoneChangesToken = token
+            }
         }
         
         changesOp.recordChangedBlock = { [weak self] record in
@@ -179,15 +183,19 @@ final class PrivateDatabaseManager: DatabaseManager {
             /// Handle the record:
             print("🍦 Record zone \(record.recordID) changed")
             guard let self = self else { return }
-            guard let syncObject = self.syncObjects.first(where: { $0.recordType == record.recordType }) else { return }
-            syncObject.add(record: record)
+            self.recordProcessingQueue.sync {
+                guard let syncObject = self.syncObjects.first(where: { $0.recordType == record.recordType }) else { return }
+                syncObject.add(record: record)
+            }
         }
         
         changesOp.recordWithIDWasDeletedBlock = { [weak self] recordId, _ in
             print("🍦 Record \(recordId) deleted")
             guard let self = self else { return }
-            guard let syncObject = self.syncObjects.first(where: { $0.zoneID == recordId.zoneID }) else { return }
-            syncObject.delete(recordID: recordId)
+            self.recordProcessingQueue.sync {
+                guard let syncObject = self.syncObjects.first(where: { $0.zoneID == recordId.zoneID }) else { return }
+                syncObject.delete(recordID: recordId)
+            }
         }
         
         changesOp.recordZoneFetchCompletionBlock = { [weak self](zoneId ,token, _, _, error) in

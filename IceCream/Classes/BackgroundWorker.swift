@@ -12,15 +12,22 @@ import RealmSwift
 // Tweaked a little by Yue Cai
 
 class BackgroundWorker: NSObject {
+
+    private final class WorkItem: NSObject {
+        let block: () -> Void
+
+        init(block: @escaping () -> Void) {
+            self.block = block
+        }
+    }
     
     static let shared = BackgroundWorker()
     
+    private let threadLock = NSLock()
     private var thread: Thread?
-    private var block: (() -> Void)?
     
     func start(_ block: @escaping () -> Void) {
-        self.block = block
-        
+        threadLock.lock()
         if thread == nil {
             thread = Thread { [weak self] in
                 guard let self = self, let th = self.thread else {
@@ -37,21 +44,29 @@ class BackgroundWorker: NSObject {
             thread?.name = "\(String(describing: self))-\(UUID().uuidString)"
             thread?.start()
         }
-        
-        if let thread = thread {
-            perform(#selector(runBlock),
-                    on: thread,
-                    with: nil,
-                    waitUntilDone: true,
-                    modes: [RunLoop.Mode.default.rawValue])
+        let workerThread = thread
+        threadLock.unlock()
+
+        guard let workerThread = workerThread else { return }
+        if Thread.current == workerThread {
+            block()
+            return
         }
+
+        perform(#selector(runBlock(_:)),
+                on: workerThread,
+                with: WorkItem(block: block),
+                waitUntilDone: true,
+                modes: [RunLoop.Mode.default.rawValue])
     }
     
     func stop() {
+        threadLock.lock()
+        defer { threadLock.unlock() }
         thread?.cancel()
     }
     
-    @objc private func runBlock() {
-        block?()
+    @objc private func runBlock(_ workItem: WorkItem) {
+        workItem.block()
     }
 }
